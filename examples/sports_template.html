@@ -1,0 +1,84 @@
+<!-- OPTIONAL DEPENDENCIES (delete these if they are redundant in your environment -->
+
+<!-- jQuery 3.2.1 -->
+	<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+
+<!-- Bootstrap 3 -->
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<!-- Widget Begins -->
+<h3>Filter By School:</h3>
+<!-- A filter system by school: pick a school from this list to only see games concering the school -->
+<select id="schoolSpinner" onchange="schoolChange()">
+	<option selected="selected">-----</option>
+</select>
+
+<!-- Displays the API fetched data in a Bootstrap 3 table -->
+<table id="schedule-table" class="table table-striped">
+	<tbody>
+
+	</tbody>
+</table>
+
+<!-- Widget Javascript -->
+<script>
+  // This function grabs the current value in the school dropdown, and forms a query to the API for that specific school
+	function schoolChange(){
+		schoolName = $('#schoolSpinner').val()
+    // If the default placeholder is selected, we don't add an extra query, and just fetch all data.
+		if (schoolName === '-----') {
+		  updateTable("")
+		} else {
+		  // Check the API docs for how this works
+			updateTable(`home_school=${schoolName}&visiting_school=${schoolName}`)
+		}
+	}
+	// This function makes the query to the API, and generates a table from it.
+	function updateTable(extras){
+	  // Clears the table
+		$("#schedule-table").find("tbody").empty()
+    // Makes a GET request to the API, adding in any extra parameters supplied
+		$.get(`https://sports-cps-api.appspot.com/api/sports/girls_bowling?${extras}`, function (data) {
+		  // table_string hold the table html, and starts off with making table headers for the columns
+			var table_string = `<tr> <th> ${Object.keys(data[0]).join('</th><th>')} </th> </tr>`
+      // We need to keep track of what schools are already in the dropdown (we are going to populate it below)
+			var schools = []
+      // Iterate through each game of the returned data from the API request
+			for (var game of data){
+			  // A string that represents one row of the table
+				var row_string = ''
+        // Get all schools, visiting and home, and loop through them
+				for (var x of [game['home_team'], game['visting_team']]) {
+				  // Make sure the school has not already been counted, and if not, add it to the spinner, and to the schools
+          // array
+					if (!schools.includes(x)){
+						$('#schoolSpinner').append($('<option>', {
+							value: x,
+							text: x
+						}))
+						schools.push(x)
+					}
+				}
+				// For each field of a game object, add a <td> of its value to the row
+				$.each(game, (k, v) => {
+					row_string += `<td>${v}</td>`
+				})	
+        // Add the row to the table string
+				table_string += `<tr>${row_string}</tr>`
+			}
+			// Push the table string to the table
+			$("#schedule-table").find("tbody").append(table_string)
+		});
+	}
+	// Makes sure that updateTable is called on page load
+	updateTable("")
+</script>
+<!-- Widget Ends -->

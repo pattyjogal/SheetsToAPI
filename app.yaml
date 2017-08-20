@@ -1,0 +1,8 @@
+runtime: python
+api_version: 1
+threadsafe: true
+env: flex
+entrypoint: gunicorn -b :$PORT main:app
+
+runtime_config:
+  python_version: 3.6
