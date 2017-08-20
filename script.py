@@ -48,7 +48,7 @@ names in the `SHEET_NAMES` dict in the following syntax:
 
     {sheet_name: slug_name}
 
-For example: if there is a sheet called "Girl's Bowling", my dict entry might look like:
+For example: if there is a sheet called "Patrick's To-dos", my dict entry might look like:
 
     {
         ...,
